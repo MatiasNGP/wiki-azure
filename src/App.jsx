@@ -1,122 +1,98 @@
 import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import Sidebar from './components/Sidebar.jsx'
+import Overview from './pages/Overview.jsx'
+import {
+  AccessControl,
+  AuditLogs,
+  IdentityPermissions,
+  Improvements,
+  InitialSecurity,
+} from './pages/Sections.jsx'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+const pageDetails = {
+  '/': { title: 'Resumen ejecutivo' },
+  '/seguridad-inicial': { title: 'Configuración de seguridad inicial' },
+  '/acceso-autenticacion': { title: 'Control de acceso y autenticación' },
+  '/identidad-permisos': { title: 'Gestión de identidad y permisos' },
+  '/auditoria-registros': { title: 'Auditoría y análisis de registros' },
+  '/mejoras': { title: 'Propuestas de mejora' },
+}
 
+function MenuIcon() {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
   )
 }
 
-export default App
+function AppShell() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { pathname } = useLocation()
+  const currentPage = pageDetails[pathname] ?? pageDetails['/']
+  const closeSidebar = () => setSidebarOpen(false)
+
+  return (
+    <div className="app-shell">
+      <Sidebar isOpen={sidebarOpen} onNavigate={closeSidebar} />
+      {sidebarOpen && (
+        <button
+          className="sidebar-scrim"
+          type="button"
+          aria-label="Cerrar menú de navegación"
+          onClick={closeSidebar}
+        />
+      )}
+
+      <div className="workspace">
+        <header className="topbar">
+          <button
+            className="mobile-menu-button"
+            type="button"
+            aria-label="Abrir menú de navegación"
+            aria-expanded={sidebarOpen}
+            onClick={() => setSidebarOpen(true)}
+          >
+            <MenuIcon />
+          </button>
+          <div className="topbar-location">
+            <span>WIKI TÉCNICA</span>
+            <span className="topbar-divider">/</span>
+            <strong>{currentPage.title}</strong>
+          </div>
+          <div className="topbar-status">
+            <span className="status-indicator" />
+            <span>Unidad 2 · Seguridad Azure</span>
+          </div>
+        </header>
+
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Overview />} />
+            <Route path="/seguridad-inicial" element={<InitialSecurity />} />
+            <Route path="/acceso-autenticacion" element={<AccessControl />} />
+            <Route path="/identidad-permisos" element={<IdentityPermissions />} />
+            <Route path="/auditoria-registros" element={<AuditLogs />} />
+            <Route path="/mejoras" element={<Improvements />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+
+        <footer className="site-footer">
+          <span>Puerto Frío Logística</span>
+          <span>Documentación técnica · Unidad 2</span>
+        </footer>
+      </div>
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppShell />
+    </BrowserRouter>
+  )
+}
